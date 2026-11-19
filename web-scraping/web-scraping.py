@@ -15,89 +15,89 @@ def resolver(valor): # lo que hace esto es sacar el valor de lalista a partir de
   else:
 
     return valor # si no funciona devolvemos el valor original
-  
-
-# url de donde sacamos los datos
-url = "https://www.officialcharts.com/charts/end-of-year-singles-chart/20250101/37501/"
-
-# Petición principal con requests, hacemos timeout=15 para no saturar la pagina
-
-# impersonate es para decir que somo chrome y poder conectarnos y que los blocks no se cierran
-
-respuesta = requests.get(url, impersonate="chrome", timeout=15) 
-
-respuesta.raise_for_status() # buscamos si hay algun error 40x,... solo si es codigo 20x no petara
-
-html_limpio = BeautifulSoup(respuesta.text, "html.parser") # este codigo, lo que hace beautiful soup es separar el html por etiquetas 
-
-script_nuxt = html_limpio.find("script", id="__NUXT_DATA__") # esto busca solo la etiqueta script que tenga id nuxt data
-
-nuxt_data = json.loads(script_nuxt.string) # pasa a json todo lo que hay dentro de el script
 
 
+for i in range(2005, 2026):
+  # url de donde sacamos los datos
+  url = f"https://www.officialcharts.com/charts/end-of-year-singles-chart/{i}0101/37501/"
+
+  # Petición principal con requests, hacemos timeout=15 para no saturar la pagina
+
+  # impersonate es para decir que somo chrome y poder conectarnos y que los blocks no se cierran
+
+  respuesta = requests.get(url, impersonate="chrome", timeout=15) 
+
+  respuesta.raise_for_status() # buscamos si hay algun error 40x,... solo si es codigo 20x no petara
+
+  html_limpio = BeautifulSoup(respuesta.text, "html.parser") # este codigo, lo que hace beautiful soup es separar el html por etiquetas 
+
+  script_nuxt = html_limpio.find("script", id="__NUXT_DATA__") # esto busca solo la etiqueta script que tenga id nuxt data
+
+  nuxt_data = json.loads(script_nuxt.string) # pasa a json todo lo que hay dentro de el script
 
 
-canciones_lista = [] # aqui guardamos una lisat con todas las canciones que hay
-
-for item in nuxt_data:
-
-  if isinstance(item, dict) == True and resolver(item.get("element")) == "track-info": # la informacion que buscamos esta en un diccionario, todo lo que no sea 
-    # diccionario no lo queremos (listas, tuplas...) y queremos sacar solo lo que el diccionario coincida que es un track-info, descartamos todo lo demas
-    # element es si la clave existe la devuelve, en este caso un numero, ese numero representa una cancion en concreto
 
 
-    # item.get devuelve la clave de el diccionario 
-    posicion = resolver(item.get("position")) # sacamos los datos a partir de su posicion 
+  canciones_lista = [] # aqui guardamos una lisat con todas las canciones que hay
 
-    titulo = resolver(item.get("title"))
+  for item in nuxt_data:
 
-    artista = resolver(item.get("artist"))
+    if isinstance(item, dict) == True and resolver(item.get("element")) == "track-info": # la informacion que buscamos esta en un diccionario, todo lo que no sea 
+      # diccionario no lo queremos (listas, tuplas...) y queremos sacar solo lo que el diccionario coincida que es un track-info, descartamos todo lo demas
+      # element es si la clave existe la devuelve, en este caso un numero, ese numero representa una cancion en concreto
 
-    semanas = resolver(item.get("weeks"))
 
-    pico = resolver(item.get("peak"))
+      # item.get devuelve la clave de el diccionario 
+      posicion = resolver(item.get("position")) # sacamos los datos a partir de su posicion 
 
-    info_url = resolver(item.get("infoUrl")) # hay mas informacion que viene dentro de cada cancion pero esta en otra url, representa el boton info
+      titulo = resolver(item.get("title"))
 
-    label = None
+      artista = resolver(item.get("artist"))
 
-    catalogo = None
+      semanas = resolver(item.get("weeks"))
 
-    primera_fecha = None # esta es la informacion que podemos sacar a partir de esos datos
-    
-    comprovar = 0 # variable que es 0 si el try except no falla, 1 en caso contraio
+      pico = resolver(item.get("peak"))
 
-    if info_url != None: # si no es vacio
+      info_url = resolver(item.get("infoUrl")) # hay mas informacion que viene dentro de cada cancion pero esta en otra url, representa el boton info
 
-      try: # try except por si peta el sacar los datos
+      label = None
 
-        #  Aquí también usamos impersonate="chrome" 
-        res_info = requests.get(info_url, impersonate="chrome", timeout=10) # esta url es de donde sacar los datos personalizados
+      catalogo = None
 
-        if (res_info.status_code == 200): # si el codigo es correcto
-
-          datos_extra = res_info.json() # sacamos los datos con json
-
-          label = datos_extra.get("label") # sacamos las etiquetas que queremos
-
-          catalogo = datos_extra.get("catNo") or datos_extra.get(
-              "catalogueNumber"
-          ) # catNo es abreviacion de catalogo number
-
-          primera_fecha = datos_extra.get("firstChartDate")
-
-      except Exception as e:
-
-        comprovar = 1
-
-        print(f"Error en canción {posicion}: {e}")
-
+      primera_fecha = None # esta es la informacion que podemos sacar a partir de esos datos
       
-    if (comprovar == 0): # si no ha petado añadimos los datos en la lista
+      comprovar = 0 # variable que es 0 si el try except no falla, 1 en caso contraio
 
-      canciones_lista.append({"posicion": posicion,"titulo": titulo,"artista": artista,"pico": pico,"semanas": semanas,"label": label,"catalogo": catalogo,"primera_fecha": primera_fecha,})
+      if info_url != None: # si no es vacio
 
-    # añadimos la cancion en la lista de las canciones con su información
+        try: # try except por si peta el sacar los datos
 
-for i in range(0, len(canciones_lista)):
-  print("i", canciones_lista[i])
+          #  Aquí también usamos impersonate="chrome" 
+          res_info = requests.get(info_url, impersonate="chrome", timeout=10) # esta url es de donde sacar los datos personalizados
+
+          if (res_info.status_code == 200): # si el codigo es correcto
+
+            datos_extra = res_info.json() # sacamos los datos con json
+
+            label = datos_extra.get("label") # sacamos las etiquetas que queremos
+
+            catalogo = datos_extra.get("catNo") or datos_extra.get(
+                "catalogueNumber"
+            ) # catNo es abreviacion de catalogo number
+
+            primera_fecha = datos_extra.get("firstChartDate")
+
+        except Exception as e:
+
+          comprovar = 1
+
+          print(f"Error en canción {posicion}: {e}")
+
+        
+      if (comprovar == 0): # si no ha petado añadimos los datos en la lista
+
+        canciones_lista.append({"posicion": posicion,"titulo": titulo,"artista": artista,"pico": pico,"semanas": semanas,"label": label,"catalogo": catalogo,"primera_fecha": primera_fecha,})
+
+      # añadimos la cancion en la lista de las canciones con su información
+  for j in range(0, 10):
+    print(i,"-", j, canciones_lista[j])
