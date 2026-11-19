@@ -103,7 +103,7 @@ for i in range(2005, 2026):
         try: # try except por si peta el sacar los datos
 
           #  Aquí también usamos impersonate="chrome" 
-          res_info = requests.get(info_url, impersonate="chrome", timeout=10) # esta url es de donde sacar los datos personalizados
+          res_info = requests.get(info_url, impersonate="chrome", timeout=20) # esta url es de donde sacar los datos personalizados
 
           if (res_info.status_code == 200): # si el codigo es correcto
 
@@ -115,7 +115,13 @@ for i in range(2005, 2026):
                 "catalogueNumber"
             ) # catNo es abreviacion de catalogo number
 
-            primera_fecha = datos_extra.get("firstChartDate")
+            primera_fecha = (
+                    datos_extra.get("firstChartDate")
+                    or datos_extra.get("firstCharted")
+                    or datos_extra.get("first_chart_date")
+                    or datos_extra.get("chartDate")
+                    or datos_extra.get("entryDate")
+                )
 
         except Exception as e:
 
