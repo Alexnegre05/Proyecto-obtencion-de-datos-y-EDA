@@ -16,8 +16,38 @@ def resolver(valor): # lo que hace esto es sacar el valor de lalista a partir de
 
     return valor # si no funciona devolvemos el valor original
 
+def escribir_fichero(fichero):
 
+  # Acumulamos todo el texto del año en una sola variable
+  bloque = f"{i} canciones:\n"
+
+  for k in range(len(canciones_lista)):
+
+    canciones = canciones_lista[k]
+
+    bloque = bloque +  (
+        f"{k} | posicion: {canciones['posicion']} | titulo: {canciones['titulo']} | artista:"
+        f" {canciones['artista']} | pico: {canciones['pico']} | semanas: {canciones['semanas']} |"
+        f" label: {canciones['label']} | catalogo: {canciones['catalogo']} | primera_fecha:"
+        f" {canciones['primera_fecha']}\n"
+    )
+
+  # Un solo .write() para todo el bloque
+  fichero.write(bloque)
+
+  fichero.flush()  # Fuerza a guardar en el disco duro inmediatamente
+
+  return fichero
+
+
+
+
+fichero_canciones = open("officialcharts_2005_2025.csv", "a", encoding="utf-8") # fichero, tiene que ser append para que no sobreescriba
+  
 for i in range(2005, 2026):
+
+  print(i)
+
   # url de donde sacamos los datos
   url = f"https://www.officialcharts.com/charts/end-of-year-singles-chart/{i}0101/37501/"
 
@@ -99,5 +129,11 @@ for i in range(2005, 2026):
         canciones_lista.append({"posicion": posicion,"titulo": titulo,"artista": artista,"pico": pico,"semanas": semanas,"label": label,"catalogo": catalogo,"primera_fecha": primera_fecha,})
 
       # añadimos la cancion en la lista de las canciones con su información
-  for j in range(0, 10):
-    print(i,"-", j, canciones_lista[j])
+  
+
+  fichero_canciones = escribir_fichero(fichero_canciones)
+    
+
+fichero_canciones.close() # cerramos el fichero
+
+  
