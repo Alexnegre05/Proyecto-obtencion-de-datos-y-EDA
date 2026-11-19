@@ -5,12 +5,12 @@ import pandas as pd
 import requests
 
 
-# Fichero que genera el web scraping (está en la carpeta principal del repositorio)
-FICHERO_SCRAPING = "officialcharts_2005_2025.csv"
+# Fichero que genera el web scraping
+FICHERO_SCRAPING = "data/raw/officialcharts_2005_2025.csv"
 
 # Ficheros que genera este script
-FICHERO_JSON = "deezer_respuestas_originales.json"  # respuestas de la API tal cual llegan
-FICHERO_CSV = "deezer_canciones.csv"                # tabla con los datos que nos interesan
+FICHERO_JSON = "data/raw/deezer_respuestas_originales.json"  # respuestas de la API tal cual llegan
+FICHERO_CSV = "data/raw/deezer_canciones.csv"             # tabla con los datos que nos interesan
 
 URL_API = "https://api.deezer.com"  # API pública de Deezer: gratis y sin clave
 
@@ -152,4 +152,3 @@ df.to_csv(FICHERO_CSV, index=False, encoding="utf-8")
 
 print(f"Encontradas en Deezer: {df['encontrada'].sum()} de {len(df)}")
 print(f"Guardado {FICHERO_JSON} y {FICHERO_CSV}")
-
