@@ -152,3 +152,4 @@ df.to_csv(FICHERO_CSV, index=False, encoding="utf-8")
 
 print(f"Encontradas en Deezer: {df['encontrada'].sum()} de {len(df)}")
 print(f"Guardado {FICHERO_JSON} y {FICHERO_CSV}")
+
