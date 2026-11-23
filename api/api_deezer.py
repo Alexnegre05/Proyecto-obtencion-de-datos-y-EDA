@@ -78,77 +78,113 @@ def artista_principal(artista):
 # Programa principal
 # ---------------------------------------------------------------------------
 
-canciones = leer_scraping(FICHERO_SCRAPING)
-print(f"Canciones leídas del scraping: {len(canciones)}")
+def buscar_api_crear_df():
+    
+    canciones = leer_scraping(FICHERO_SCRAPING)
 
-# una canción puede salir en varios años: la buscamos una sola vez
-canciones_unicas = []
-for cancion in canciones:
-  pareja = (cancion["titulo"], cancion["artista"])
-  if pareja not in canciones_unicas:
-    canciones_unicas.append(pareja)
+    print(f"Canciones leídas del scraping: {len(canciones)}")
 
-print(f"Canciones distintas a buscar en Deezer: {len(canciones_unicas)}")
+    # una canción puede salir en varios años: la buscamos una sola vez
+    canciones_unicas = []
 
-respuestas_originales = []  # aquí guardamos todo lo que devuelve la API
-filas = []                  # aquí guardamos los datos que nos interesan
+    for cancion in canciones:
 
-for n, (titulo, artista) in enumerate(canciones_unicas):
+      pareja = (cancion["titulo"], cancion["artista"])
 
-  print(n + 1, "/", len(canciones_unicas), "-", titulo, "-", artista)
+      if pareja not in canciones_unicas:
 
-  fila = {"titulo": titulo, "artista": artista, "encontrada": False}
+        canciones_unicas.append(pareja)
 
-  # 1. Buscamos la canción escribiendo el artista principal y el título, como en el buscador de Deezer
-  busqueda = llamar_api("/search", {"q": f"{artista_principal(artista)} {titulo}", "limit": 5})
-  respuestas_originales.append({"titulo": titulo, "artista": artista, "busqueda": busqueda})
+    print(f"Canciones distintas a buscar en Deezer: {len(canciones_unicas)}")
 
-  # 2. De los 5 primeros resultados, nos quedamos con el primero cuyo título coincide con el nuestro
-  #    (así evitamos quedarnos con una canción que no tiene nada que ver)
-  resultado = None
+    respuestas_originales = []  # aquí guardamos todo lo que devuelve la API
+    filas = []                  # aquí guardamos los datos que nos interesan
 
-  if busqueda != None:
-    for opcion in busqueda["data"]:
-      titulo_deezer = opcion["title"].lower().replace("’", "'")
-      if titulo.lower() in titulo_deezer or titulo_deezer in titulo.lower():
-        resultado = opcion
-        break
+    for n, (titulo, artista) in enumerate(canciones_unicas):
 
-  if resultado != None:
+      print(n + 1, "/", len(canciones_unicas), "-", titulo, "-", artista)
 
-    # 3. Pedimos los datos del álbum (sello, género, fecha) y del artista (seguidores)
-    album = llamar_api(f"/album/{resultado['album']['id']}")
-    datos_artista = llamar_api(f"/artist/{resultado['artist']['id']}")
-    respuestas_originales[-1]["album"] = album
-    respuestas_originales[-1]["artista_deezer"] = datos_artista
+      fila = {"titulo": titulo, "artista": artista, "encontrada": False}
 
-    fila["encontrada"] = True
-    fila["deezer_titulo"] = resultado["title"]
-    fila["deezer_artista"] = resultado["artist"]["name"]
-    fila["duracion_s"] = resultado["duration"]
-    fila["explicita"] = resultado["explicit_lyrics"]
-    fila["popularidad_deezer"] = resultado["rank"]
+      # 1. Buscamos la canción escribiendo el artista principal y el título, como en el buscador de Deezer
+      busqueda = llamar_api("/search", {"q": f"{artista_principal(artista)} {titulo}", "limit": 5})
 
-    if album != None:
-      generos = album.get("genres", {}).get("data", [])
-      fila["sello_deezer"] = album.get("label")
-      fila["fecha_lanzamiento"] = album.get("release_date")
-      fila["tipo_lanzamiento"] = album.get("record_type")  # single, album, ep...
-      fila["genero"] = generos[0]["name"] if len(generos) > 0 else None
-
-    if datos_artista != None:
-      fila["artista_fans"] = datos_artista.get("nb_fan")
-
-  filas.append(fila)
+      respuestas_originales.append({"titulo": titulo, "artista": artista, "busqueda": busqueda})
 
 
-# 4. Guardamos las respuestas originales y la tabla
-with open(FICHERO_JSON, "w", encoding="utf-8") as f:
-  json.dump(respuestas_originales, f, ensure_ascii=False, indent=1)
+      # 2. De los 5 primeros resultados, nos quedamos con el primero cuyo título coincide con el nuestro
+      #    (así evitamos quedarnos con una canción que no tiene nada que ver)
+      resultado = None
 
-df = pd.DataFrame(filas)
-df["fecha_obtencion"] = time.strftime("%Y-%m-%d")
-df.to_csv(FICHERO_CSV, index=False, encoding="utf-8")
+      if busqueda != None:
 
-print(f"Encontradas en Deezer: {df['encontrada'].sum()} de {len(df)}")
-print(f"Guardado {FICHERO_JSON} y {FICHERO_CSV}")
+        for opcion in busqueda["data"]:
+
+          titulo_deezer = opcion["title"].lower().replace("’", "'")
+
+          if titulo.lower() in titulo_deezer or titulo_deezer in titulo.lower():
+
+            resultado = opcion
+            break
+
+      if resultado != None:
+
+        # 3. Pedimos los datos del álbum (sello, género, fecha) y del artista (seguidores)
+        album = llamar_api(f"/album/{resultado['album']['id']}")
+
+        datos_artista = llamar_api(f"/artist/{resultado['artist']['id']}")
+
+        respuestas_originales[-1]["album"] = album
+
+        respuestas_originales[-1]["artista_deezer"] = datos_artista
+
+
+        fila["encontrada"] = True
+
+        fila["deezer_titulo"] = resultado["title"]
+
+        fila["deezer_artista"] = resultado["artist"]["name"]
+
+        fila["duracion_s"] = resultado["duration"]
+
+        fila["explicita"] = resultado["explicit_lyrics"]
+
+        fila["popularidad_deezer"] = resultado["rank"]
+
+
+
+        if album != None:
+
+          generos = album.get("genres", {}).get("data", [])
+
+          fila["sello_deezer"] = album.get("label")
+
+          fila["fecha_lanzamiento"] = album.get("release_date")
+
+          fila["tipo_lanzamiento"] = album.get("record_type")  # single, album, ep...
+
+          fila["genero"] = generos[0]["name"] if len(generos) > 0 else None
+
+        if datos_artista != None:
+
+          fila["artista_fans"] = datos_artista.get("nb_fan")
+
+      filas.append(fila)
+
+
+    # 4. Guardamos las respuestas originales y la tabla
+    with open(FICHERO_JSON, "w", encoding="utf-8") as f:
+
+      json.dump(respuestas_originales, f, ensure_ascii=False, indent=1)
+
+    df = pd.DataFrame(filas)
+
+    df["fecha_obtencion"] = time.strftime("%Y-%m-%d")
+
+    df.to_csv(FICHERO_CSV, index=False, encoding="utf-8")
+
+    print(f"Encontradas en Deezer: {df['encontrada'].sum()} de {len(df)}")
+
+    print(f"Guardado {FICHERO_JSON} y {FICHERO_CSV}")
+    
+    return df
