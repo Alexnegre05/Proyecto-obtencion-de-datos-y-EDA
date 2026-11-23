@@ -31,3 +31,6 @@ vacios_por_columna = df.select_dtypes(include=['object', 'string']).apply(
 print("Datos vacíos (no nulos) por columna:")
 print(vacios_por_columna)
 print("\nTotal de celdas vacías en todo el DataFrame:", vacios_por_columna.sum())
+
+df = df.drop(columns=["indice"])
+print(df.head())
