@@ -66,54 +66,59 @@ def es_correcta(fila):
   return False
 
 
-# ---------------------------------------------------------------------------
-# 1. Cargar los datos originales en un DataFrame
-# ---------------------------------------------------------------------------
 
-df = pd.read_csv(FICHERO_ORIGINAL)
+def df_limpio():
+      
+    # ---------------------------------------------------------------------------
+    # 1. Cargar los datos originales en un DataFrame
+    # ---------------------------------------------------------------------------
 
-
-# ---------------------------------------------------------------------------
-# 2. Revisar las coincidencias y vaciar las incorrectas
-# ---------------------------------------------------------------------------
-
-df["coincidencia_correcta"] = df.apply(es_correcta, axis=1)
-
-# en las incorrectas, los datos de Deezer no son de nuestra canción: los dejamos vacíos
-df.loc[df["coincidencia_correcta"] == False, COLUMNAS_DEEZER] = None
+    df = pd.read_csv(FICHERO_ORIGINAL)
 
 
-# ---------------------------------------------------------------------------
-# 3. Poner a cada columna su tipo correcto
-# ---------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------
+    # 2. Revisar las coincidencias y vaciar las incorrectas
+    # ---------------------------------------------------------------------------
 
-# fechas
-df["fecha_lanzamiento"] = pd.to_datetime(df["fecha_lanzamiento"], errors="coerce")
-df["fecha_obtencion"] = pd.to_datetime(df["fecha_obtencion"], errors="coerce")
+    df["coincidencia_correcta"] = df.apply(es_correcta, axis=1)
 
-# fechas erróneas: Deezer pone 0000-00-00 o fechas futuras cuando no la sabe
-df.loc[df["fecha_lanzamiento"] > df["fecha_obtencion"], "fecha_lanzamiento"] = None
-df["anio_lanzamiento"] = df["fecha_lanzamiento"].dt.year.astype("Int64")
-
-# números enteros (Int64 admite valores vacíos)
-for columna in ["duracion_s", "popularidad_deezer", "artista_fans"]:
-  df[columna] = df[columna].astype("Int64")
-
-# verdadero / falso
-df["explicita"] = df["explicita"].astype("boolean")
-
-# categorías (pocos valores que se repiten)
-for columna in ["tipo_lanzamiento", "genero", "sello_deezer"]:
-  df[columna] = df[columna].astype("category")
-
-# la columna "encontrada" ya no hace falta: "coincidencia_correcta" la sustituye
-df = df.drop(columns=["encontrada"])
+    # en las incorrectas, los datos de Deezer no son de nuestra canción: los dejamos vacíos
+    df.loc[df["coincidencia_correcta"] == False, COLUMNAS_DEEZER] = None
 
 
-# ---------------------------------------------------------------------------
-# 4. Guardar el DataFrame preparado
-# ---------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------
+    # 3. Poner a cada columna su tipo correcto
+    # ---------------------------------------------------------------------------
 
-os.makedirs(CARPETA_PREPARADOS, exist_ok=True)
-df.to_csv(FICHERO_PREPARADO, index=False, encoding="utf-8")
-print(f"DataFrame creado y guardado en {FICHERO_PREPARADO}")
+    # fechas
+    df["fecha_lanzamiento"] = pd.to_datetime(df["fecha_lanzamiento"], errors="coerce")
+    df["fecha_obtencion"] = pd.to_datetime(df["fecha_obtencion"], errors="coerce")
+
+    # fechas erróneas: Deezer pone 0000-00-00 o fechas futuras cuando no la sabe
+    df.loc[df["fecha_lanzamiento"] > df["fecha_obtencion"], "fecha_lanzamiento"] = None
+    df["anio_lanzamiento"] = df["fecha_lanzamiento"].dt.year.astype("Int64")
+
+    # números enteros (Int64 admite valores vacíos)
+    for columna in ["duracion_s", "popularidad_deezer", "artista_fans"]:
+      df[columna] = df[columna].astype("Int64")
+
+    # verdadero / falso
+    df["explicita"] = df["explicita"].astype("boolean")
+
+    # categorías (pocos valores que se repiten)
+    for columna in ["tipo_lanzamiento", "genero", "sello_deezer"]:
+      df[columna] = df[columna].astype("category")
+
+    # la columna "encontrada" ya no hace falta: "coincidencia_correcta" la sustituye
+    df = df.drop(columns=["encontrada"])
+
+
+    # ---------------------------------------------------------------------------
+    # 4. Guardar el DataFrame preparado
+    # ---------------------------------------------------------------------------
+
+    os.makedirs(CARPETA_PREPARADOS, exist_ok=True)
+    df.to_csv(FICHERO_PREPARADO, index=False, encoding="utf-8")
+    print(f"DataFrame creado y guardado en {FICHERO_PREPARADO}")
+
+    return df
