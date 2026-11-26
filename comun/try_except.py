@@ -48,6 +48,7 @@ def try_except_string(string):
         try:
 
             resultado = input((string))
+            
             comprovar = 1
 
         except:

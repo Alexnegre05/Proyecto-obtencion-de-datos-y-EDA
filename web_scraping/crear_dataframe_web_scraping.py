@@ -24,6 +24,7 @@ def crear_dataframe_web_scraping():
 
 
     # Contar cadenas vacías ("") o que solo tienen espacios ("   ") por columna
+    # solo puede ser o string o object que a veces esta puesto como string
     vacios_por_columna = df.select_dtypes(include=['object', 'string']).apply(
         lambda col: (col.str.strip() == '').sum()
     )
@@ -35,7 +36,7 @@ def crear_dataframe_web_scraping():
     print(vacios_por_columna)
     print("\nTotal de celdas vacías en todo el DataFrame:", vacios_por_columna.sum())
 
-    df = df.drop(columns=["indice"])
-    print(df.head())
+    df = df.drop(columns=["indice"]) # borramos indice porque ya tenemos la posicion
+    print(df.head()) # mostramos el resultado final
 
-    return df
+    return df # devolvemos el dataframe
