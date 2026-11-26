@@ -20,6 +20,7 @@ from graficos.barras import diagramas_barras
 from graficos.dispersion import diagramas_dispersion
 
 from graficos.mapa_calor import mapa_calor
+
 def menu_general():
 
     print("0 salir")

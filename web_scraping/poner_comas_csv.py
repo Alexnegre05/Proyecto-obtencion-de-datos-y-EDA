@@ -1,11 +1,13 @@
+from pathlib import Path
 
-ruta_archivo = r"D:\Alex Negre IA+BD\Proyecto-obtencion-de-datos-y-EDA\data\raw\officialcharts_2005_2025.csv"
+BASE_DIR = Path(__file__).resolve().parent.parent # .parent sube un nivel de la carpeta hasta la carpeta principal
+ruta_archivo = BASE_DIR / "data" / "raw" / "officialcharts_2005_2025.csv" # esto es para coger el csv 
 
 filas = []
 ""
 año_actual = None
 
-fichero = open(ruta_archivo, "r", encoding="utf-8")
+fichero = open(ruta_archivo, "r", encoding="utf-8") # abrimos el fichero
 
 
 for linea in fichero: # vamos linea a linea en el fichero
@@ -13,6 +15,7 @@ for linea in fichero: # vamos linea a linea en el fichero
     linea = linea.strip() # quitanos los espacios en blanco
 
     if linea.endswith("canciones:"): # mira si acaba con un texto de canciones:
+        
         año_actual = int(linea.split()[0]) # guardamos el año actual
 
         continue
@@ -24,10 +27,15 @@ for linea in fichero: # vamos linea a linea en el fichero
     # añadimos el indice
 
         # Recorremos el resto de campos (posicion, titulo, artista, etc.)
+
     for bloque in partes[1:]:
+
         clave, valor = bloque.split(":", 1)  # separa solo por el primer ':'
+
         clave = clave.strip()
+
         valor = valor.strip()
+
 
         # Limpiamos las etiquetas HTML <time...> si es la columna primera_fecha
         if clave == "primera_fecha" and ">" in valor:
@@ -50,8 +58,11 @@ fichero_salida.write(",".join(columnas) + "\n")
 
 # Escribimos cada canción
 for cancion in filas:
+
     valores = []
+
     for col in columnas:
+
         dato = str(cancion[col])
         # Si el dato tiene una coma dentro, lo rodeamos de comillas para que no se parta la columna
         if "," in dato:
@@ -60,4 +71,4 @@ for cancion in filas:
     
     fichero_salida.write(",".join(valores) + "\n")
 
-fichero_salida.close()
+fichero_salida.close() # cerramos el fichero
