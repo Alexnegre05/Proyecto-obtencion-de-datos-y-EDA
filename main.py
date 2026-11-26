@@ -7,6 +7,9 @@ from api.api_deezer import buscar_api_crear_df
 
 from api.dataframe_api import df_limpio
 
+from comun.fusionar_dataframes import limpiar_dataframe_final, fusionar_dataframes
+
+from graficos.histograma import generar_histograma_duracion, generar_histograma_duracion_por_año, generar_histograma_fans
 def menu_general():
 
     print("0 salir")
@@ -122,13 +125,13 @@ opcion = -1
 
 while(opcion != 0): # bucle que solo sale si se escribe un 0
 
-    opcion = try_except_int("escoge una opcion")
+    opcion = try_except_int("escoge una opcion: ")
 
     while(opcion < 0 or opcion > 3):
 
         menu_general()
 
-        opcion = try_except_int("escoge una opcion correcta")
+        opcion = try_except_int("escoge una opcion correcta: ")
 
 
     if (opcion == 1): # opciones de solo la web_scraping
@@ -141,4 +144,23 @@ while(opcion != 0): # bucle que solo sale si se escribe un 0
         dataframe_api_scraping = api_menu()
 
     elif (opcion == 3):
-        pass
+
+        df = limpiar_dataframe_final(fusionar_dataframes())
+
+        print("histograma general")
+        generar_histograma_duracion(df)
+
+        año_elegido = try_except_int("Introduce el año que quieres visualizar entre 2005-2025, 0 para salir: ")
+        
+        if (año_elegido != 0):
+
+            while(año_elegido < 2005 or año_elegido > 2025):
+
+                año_elegido = try_except_int("Introduce el año que quieres visualizar, 0 para salir: ")
+
+            if (año_elegido != 0):
+
+                generar_histograma_duracion_por_año(df, año_elegido)
+
+            
+            generar_histograma_fans(df)
