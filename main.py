@@ -10,6 +10,8 @@ from api.dataframe_api import df_limpio
 from comun.fusionar_dataframes import limpiar_dataframe_final, fusionar_dataframes
 
 from graficos.histograma import generar_histograma_duracion, generar_histograma_duracion_por_año, generar_histograma_fans
+
+from graficos.blotpox_outliers import generar_boxplot
 def menu_general():
 
     print("0 salir")
@@ -32,6 +34,16 @@ def menu_api():
     print("1 buscar datos api")
     print("2 limpiar dataframe")
 
+
+
+    
+def menu_grafica():
+
+    print("0 salir")
+    print("1 histograma")
+    print("2 barras")
+    print("3 blotpox")
+    print("4 dispersion")
 
 
 def web_scraping_menus():
@@ -113,8 +125,6 @@ def api_menu():
 
     return dataframe_api_scraping
 
-    
-
 
 
 
@@ -145,22 +155,46 @@ while(opcion != 0): # bucle que solo sale si se escribe un 0
 
     elif (opcion == 3):
 
-        df = limpiar_dataframe_final(fusionar_dataframes())
+        menu_grafica()
 
-        print("histograma general")
-        generar_histograma_duracion(df)
+        opcion_grafica = try_except_int("escoge una opcion: ")
 
-        año_elegido = try_except_int("Introduce el año que quieres visualizar entre 2005-2025, 0 para salir: ")
-        
-        if (año_elegido != 0):
+        while(opcion != 0):
 
-            while(año_elegido < 2005 or año_elegido > 2025):
+            while(opcion < 0 or opcion > 4):
 
-                año_elegido = try_except_int("Introduce el año que quieres visualizar, 0 para salir: ")
+                opcion_grafica = try_except_int("escoge una opcion correcta: ")
 
-            if (año_elegido != 0):
 
-                generar_histograma_duracion_por_año(df, año_elegido)
+            if (opcion != 0):
 
-            
-            generar_histograma_fans(df)
+                df = limpiar_dataframe_final(fusionar_dataframes())
+
+                if (opcion == 1):
+
+                
+                    print("histograma general")
+                    
+                    generar_histograma_duracion(df)
+
+                    año_elegido = try_except_int("Introduce el año que quieres visualizar entre 2005-2025, 0 para salir: ")
+                    
+                    if (año_elegido != 0):
+
+                        while(año_elegido < 2005 or año_elegido > 2025):
+
+                            año_elegido = try_except_int("Introduce el año que quieres visualizar, 0 para salir: ")
+
+                        if (año_elegido != 0):
+
+                            generar_histograma_duracion_por_año(df, año_elegido)
+
+                        
+                        generar_histograma_fans(df)
+
+                
+                elif (opcion == 3):
+
+                    tabla = input("escribe que grafica quieres ver el blotpox: ")
+
+                    generar_boxplot(df, tabla)
