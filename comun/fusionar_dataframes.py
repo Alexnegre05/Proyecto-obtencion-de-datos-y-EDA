@@ -38,8 +38,7 @@ def fusionar_dataframes(df_web_scraping=None, df_api=None):
     # validate="many_to_one" -> una canción puede salir varios años, pero en Deezer solo una vez
     df = df_web_scraping.merge(df_api, on=COLUMNAS_UNION, how="left", validate="many_to_one")
 
-    print("tamaño del dataframe fusionado:", df.shape)
-    print(df.head())
+    
 
     # guardamos el resultado
     os.makedirs(CARPETA_PREPARADOS, exist_ok=True)
@@ -110,9 +109,6 @@ def limpiar_dataframe_final(df):
     df = poner_formatos(df)
     df = imputar_datos(df)
 
-    print("tamaño del dataframe final:", df.shape)
-    print("valores vacíos que quedan:", df.isna().sum().sum())
-    print(df.info())
 
     # guardamos el resultado
     df.to_csv(FICHERO_FUSIONADO, index=False, encoding="utf-8")
